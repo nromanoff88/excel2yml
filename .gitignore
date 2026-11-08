@@ -1,0 +1,6 @@
+# Временные lock-файлы Microsoft Excel (появляются, пока открыт .xlsm)
+~$*.xlsm
+~$*.xlsx
+~$*.xltm
+*.tmp
+

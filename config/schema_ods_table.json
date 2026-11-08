@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/ods/schema#",
+  "title": "Схема конфигураций для FrameWork ODS.",
+  "type": "object",
+  "required": ["schedule_cron", "enabled_flag", "source", "capture", "watermark", "table", "columns"],
+  "properties": {
+    "schedule_cron": { "type": ["string", "null"], "description": "Расписание для загрузки" },
+    "enabled_flag": { "type": "boolean", "description": "Флаг включения"},
+    "source": {
+      "type": "object",
+      "required": ["connector_name", "connector_table_schema", "connector_table_name", "connector_read_parallel_number"],
+      "properties": {
+        "connector_name": { "type": "string" ,"description": "Имя коннектора в Trino" },
+        "connector_table_schema": { "type": "string","description": "Имя схемы в коннекторе Trino"  },
+        "connector_table_name": { "type": "string" ,"description": "Имя таблицы в коннекторе Trino"  },
+        "connector_read_parallel_number": { "type": "integer" ,"description": "Колво потоков загрузки. ПОКА НЕ РАБОТАЕТ" }
+      }
+    },
+    "capture": {
+      "type": "object",
+      "required": ["data_capture_type", "pattern_capture","hard_delete_source_flag","soft_delete_clause_trino","where_clause_trino","watermark_clause_trino","order_latest_clause_trino","cross_join_lateral_selects_trino"],
+      "properties": {
+        "data_capture_type": { "type": "string", "enum": ["full","incremental", "snapshot"],"description": "Тип захвата данных" },
+        "pattern_capture": { "type":  ["string", "null"]  ,"description": "Паттерн захвата данных" },
+        "hard_delete_source_flag": {  "description": "Признак физического удаления на источнике"},
+        "soft_delete_clause_trino": { "type":  ["string", "null"]  , "description": "SQL-условие для пометки строк как удалённых (например, status = 'deleted')"},
+        "where_clause_trino": { "type":  ["string", "null"]  , "description": "Необязательные дополнительный фильтр для исключения мусорных строк на источнике.. Заполняется в диалекте Trino без предиката  WHERE"},
+        "watermark_clause_trino": { "type":  ["string", "null"]  , "description": "Условие для инкремента (использует WM). . Заполняется в диалекте Trino без предиката  WHERE. Только для data_capture_type = incremental"},
+        "order_latest_clause_trino": { "type":  ["string", "null"]  , "description": "Условие сортировки при дедубликации по RKH загружаемого батча данных. Если не заполнено, то при получении из источника дублей по RKH будет происходить дедубликация случайным образом. Заполняется в диалекте Trino"},
+        "cross_join_lateral_selects_trino": { "type":  ["array", "null"]  , "description": "Массив SQL-выражений для разворачивания массивов.. Заполняется в диалекте Trino"}
+      }
+    },
+    "watermark": {
+      "type": "object",
+      "required": ["select_wm_max_timestamp_sql", "select_wm_min_timestamp_sql","select_wm_max_id_sql","select_wm_min_id_sql","select_wm_target_timestamp_sql","select_wm_target_id_sql"],
+      "properties": {
+        "select_wm_max_timestamp_sql": { "description": "SQL запрос для вычисления {{wm_max_timestamp}}. Должен содержать колонку wm_max_timestamp типа TIMESTAMP. Заполняется в диалекте Trino" },
+        "select_wm_min_timestamp_sql": {  "description": "SQL запрос для вычисления {{wm_min_timestamp}}. Должен содержать колонку wm_min_timestamp типа TIMESTAMP. Заполняется в диалекте Trino" },
+        "select_wm_max_id_sql": {  "description": "SQL запрос для вычисления {{wm_max_id}}. Должен содержать колонку wm_max_id типа INT8. Заполняется в диалекте Trino" },
+        "select_wm_min_id_sql": { "description": "SQL запрос для вычисления {{wm_min_id}}. Должен содержать колонку wm_min_id типа INT8. Заполняется в диалекте Trino"},
+        "select_wm_target_timestamp_sql": {  "description": "SQL запрос для вычисления нового значения WM. Должен содержать колонку wm_target_timestamp типа TIMESTAMP. Заполняется в диалекте Trino" },
+        "select_wm_target_id_sql": {  "description": "SQL запрос для вычисления нового значения WM. Должен содержать колонку wm_target_id типа INT8. Заполняется в диалекте Trino" }
+      }
+    },
+    "table": { "type": "object",
+      "required": [
+        "partitions_count","comment", "export_ahd_gp"
+      ],
+      "properties": {
+        "export_ahd_gp": {
+          "type": ["string", "null"],
+          "description": "Выгрузка в AHD GreenPlum среза",
+          "enum": ["latest", null]
+        },
+        "partitions_count": {
+          "type": "int",
+          "description": "Количество партиций в Iceberg"
+        },
+        "comment" : {
+          "type": ["string", "null"],
+          "description": "Комментарий к таблице"
+        }
+      }
+    },
+    "columns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ods_column_name", "connector_mapping_sql", "rkh_flag", "enabled_flag"],
+        "properties": {
+          "ods_column_name": { "type": "string" , "description": "Имя колонки в таблице ODS"},
+          "ods_column_type": { "type": "string",  "description": "Тип колонки в диалекте Trino",
+            "anyOf": [{"enum": [
+              "boolean",
+              "integer",
+              "bigint",
+              "varchar",
+              "timestamp",
+              "timestamp(3)",
+              "timestamp(6)",
+              "uuid",
+              "date",
+              "varbinary",
+              "time"]},
+              {"pattern": "^decimal\\((?:[1-9]|[12][0-9]|3[0-8]),\\s*[0-9]+\\)$"}
+            ]},
+          "connector_mapping_sql": { "type": "string" , "description": "SQL-выражение в диалекте TRINO для извлечения данных из источника (диалект Trino)."},
+          "rkh_flag": { "type": "boolean" , "description": "колонка входит в состав бизнес-ключа (rkh)"},
+          "enabled_flag": { "type": "boolean", "description": "Признак активности записи" },
+          "comment": { "type": "string" , "description": "Описание колонки в таблице ODS"}
+        }
+      }
+    }
+  },
+  "if" : {
+    "properties": {
+      "capture" : {
+        "properties": {
+          "data_capture_type": {"const" : "full"}
+        },
+        "required" : ["data_capture_type"]
+      }
+    }
+
+  },
+  "then" : {
+    "properties": {
+      "watermark" : {
+        "properties" : {
+          "select_wm_max_timestamp_sql": { "type": [null] },
+          "select_wm_min_timestamp_sql": { "type": [null] },
+          "select_wm_max_id_sql": { "type": [null] },
+          "select_wm_min_id_sql": { "type": [null] },
+          "select_wm_target_timestamp_sql": { "type": [null] },
+          "select_wm_target_id_sql": { "type": [null] }
+        }
+      }
+    }
+  },
+  "else" : {
+    "properties": {
+      "watermark" : {
+        "properties" : {
+          "select_wm_max_timestamp_sql": { "type": ["string"] },
+          "select_wm_min_timestamp_sql": { "type": ["string"] },
+          "select_wm_max_id_sql": { "type": ["string"] },
+          "select_wm_min_id_sql": { "type": ["string"] },
+          "select_wm_target_timestamp_sql": { "type": ["string"] },
+          "select_wm_target_id_sql": { "type": ["string"] }
+        }
+      }
+    }
+  }
+}

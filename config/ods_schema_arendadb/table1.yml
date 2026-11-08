@@ -1,0 +1,57 @@
+# $schema: ../schema_ods_table.json
+schedule_cron: '12 0 * * *'
+enabled_flag: true
+
+source:
+  connector_name: 'arendadb'
+  connector_table_schema: 'public'
+  connector_table_name: 'cds_event_type'
+  connector_read_parallel_number: 1
+
+capture:
+  data_capture_type: full
+  pattern_capture: null
+  hard_delete_source_flag: true
+  soft_delete_clause_trino: null
+  where_clause_trino: null
+  watermark_clause_trino: null
+  order_latest_clause_trino: null
+  cross_join_lateral_selects_trino: null
+
+watermark:
+  select_wm_max_timestamp_sql: null
+  select_wm_min_timestamp_sql: null
+  select_wm_max_id_sql: null
+  select_wm_min_id_sql: null
+  select_wm_target_timestamp_sql: null
+  select_wm_target_id_sql: null
+
+table:
+  comment: ''
+  partitions_count: 1
+  export_ahd_gp: latest
+
+columns:
+  - ods_column_name: code
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      code
+    rkh_flag: true
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: name_fld
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      name
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: name_fld2
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      name2
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''

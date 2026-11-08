@@ -1,0 +1,402 @@
+# $schema: ../schema_ods_table.json
+schedule_cron: '12 0 * * *'
+enabled_flag: true
+
+source:
+  connector_name: 'arendadb'
+  connector_table_schema: 'public'
+  connector_table_name: 'contract'
+  connector_read_parallel_number: 1
+
+capture:
+  data_capture_type: incremental
+  pattern_capture: null
+  hard_delete_source_flag: false
+  soft_delete_clause_trino: |-
+    status = 'deleted' 
+  where_clause_trino: |-
+    deleted_flag = true
+  watermark_clause_trino: |-
+    updated_at  >= from_iso8601_timestamp( '{{wm_min_timestamp}}')
+  order_latest_clause_trino: null
+  cross_join_lateral_selects_trino: null
+
+watermark:
+  select_wm_max_timestamp_sql: |-
+    <default>
+  select_wm_min_timestamp_sql: |-
+    <default>
+  select_wm_max_id_sql: |-
+    <default>
+  select_wm_min_id_sql: |-
+    <default>
+  select_wm_target_timestamp_sql: |-
+    select max(updated_at) as wm_target_timestamp from {{var.value.ahd_iceberg_catalog_name}}.stage_schema.{{connector_name}}__{{ods_table_name}}  
+  select_wm_target_id_sql: |-
+    select null
+
+table:
+  comment: ''
+  partitions_count: 1
+  export_ahd_gp: latest
+
+columns:
+  - ods_column_name: id
+    ods_column_type: integer
+    connector_mapping_sql: |-
+      id
+    rkh_flag: true
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: tenant_id
+    ods_column_type: integer
+    connector_mapping_sql: |-
+      tenant_id
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: realty_id
+    ods_column_type: integer
+    connector_mapping_sql: |-
+      realty_id
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: arrived_at
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      arrived_at
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: departed_at
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      departed_at
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: ended_at
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      ended_at
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: amount
+    ods_column_type: decimal(38,4)
+    connector_mapping_sql: |-
+      amount
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: deposit
+    ods_column_type: decimal(38,4)
+    connector_mapping_sql: |-
+      deposit
+    rkh_flag: false
+    enabled_flag: true
+    comment: 'колонка с депозитом'
+
+  - ods_column_name: created_at
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      created_at
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: updated_at
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      updated_at
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: status
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      status
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: status_changed_at
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      status_changed_at
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: state
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      state
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: number
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      number
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: started_at
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      started_at
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: terminated_at
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      terminated_at
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: with_pets
+    ods_column_type: boolean
+    connector_mapping_sql: |-
+      with_pets
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: signed_at
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      signed_at
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: keys_quantity
+    ods_column_type: integer
+    connector_mapping_sql: |-
+      keys_quantity
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: pass_quantity
+    ods_column_type: integer
+    connector_mapping_sql: |-
+      pass_quantity
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: is_waiting_communal_invoice
+    ods_column_type: boolean
+    connector_mapping_sql: |-
+      is_waiting_communal_invoice
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: waiting_communal_invoice_at
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      waiting_communal_invoice_at
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: uuid
+    ods_column_type: uuid
+    connector_mapping_sql: |-
+      uuid
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: parent_id
+    ods_column_type: integer
+    connector_mapping_sql: |-
+      parent_id
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: access_restricted
+    ods_column_type: boolean
+    connector_mapping_sql: |-
+      access_restricted
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: offer_num
+    ods_column_type: integer
+    connector_mapping_sql: |-
+      offer_num
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: terminate_reason
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      terminate_reason
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: terminate_deposit_return_type
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      terminate_deposit_return_type
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: terminate_checkout_type
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      terminate_checkout_type
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: signed_departed_at
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      signed_departed_at at time zone 'Europe/Moscow' 
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: return_amount_sum
+    ods_column_type: integer
+    connector_mapping_sql: |-
+      return_amount_sum
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: return_amount_date
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      return_amount_date at time zone 'Europe/Moscow'  
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: deposit_division_count
+    ods_column_type: integer
+    connector_mapping_sql: |-
+      deposit_division_count
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: booking_id
+    ods_column_type: uuid
+    connector_mapping_sql: |-
+      booking_id
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: fact_signed_at
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      fact_signed_at
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: prolongation_type
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      prolongation_type
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: prolongation_planned_at
+    ods_column_type: timestamp(6)
+    connector_mapping_sql: |-
+      prolongation_planned_at at time zone 'Europe/Moscow' 
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: prolongation_reject_reason_type
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      prolongation_reject_reason_type
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: prolongation_reject_reason_comment
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      prolongation_reject_reason_comment
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: term_type
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      term_type
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: offer_num_formatted
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      offer_num_formatted
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: terminate_resettlement_reason
+    ods_column_type: varchar
+    connector_mapping_sql: |-
+      terminate_resettlement_reason
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: terminate_resettlement_complex_id
+    ods_column_type: integer
+    connector_mapping_sql: |-
+      terminate_resettlement_complex_id
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: double_rent_id
+    ods_column_type: integer
+    connector_mapping_sql: |-
+      double_rent_id
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
+
+  - ods_column_name: planned_review_at
+    ods_column_type: date
+    connector_mapping_sql: |-
+      planned_review_at
+    rkh_flag: false
+    enabled_flag: true
+    comment: ''
